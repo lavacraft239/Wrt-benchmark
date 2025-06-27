@@ -13,9 +13,11 @@ typedef struct {
     char url[MAX_URL_LEN];
     int threads;
     int connections;
-    int duration; // segundos
-    int timeout;  // segundos
-    int insecure; // nuevo: ignorar certificado
+    int duration;        // segundos
+    int timeout_total;   // CURLOPT_TIMEOUT
+    int timeout_connect; // CURLOPT_CONNECTTIMEOUT
+    int insecure;        // ignorar certificado SSL
+    int ignore_url;      // simular petición (sin hacer request real)
 } config_t;
 
 typedef struct {
@@ -42,7 +44,7 @@ double now_ms() {
 }
 
 size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
-    return size * nmemb; // ignorar contenido
+    return size * nmemb; // ignorar cuerpo
 }
 
 void print_progress_bar(int elapsed, int total) {
@@ -70,85 +72,178 @@ void *progress_bar_thread(void *arg) {
     return NULL;
 }
 
-void *worker(void *arg) {
+// Aquí empieza lo nuevo para curl_multi y benchmark avanzado
+
+typedef struct {
+    CURL *easy_handle;
+    double start_time_ms;
+    config_t *config;
+    int active; // si esta activa la request
+} easy_request_t;
+
+void check_and_update_stats(CURL *curl, CURLcode res, double latency) {
+    long code = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+
+    pthread_mutex_lock(&stats.lock);
+    if (res == CURLE_OK && code >= 200 && code < 400) {
+        stats.requests++;
+        stats.total_latency += latency;
+        if (latency < stats.min_latency) stats.min_latency = latency;
+        if (latency > stats.max_latency) stats.max_latency = latency;
+    } else if (res == CURLE_OPERATION_TIMEDOUT) {
+        stats.timeouts++;
+    } else {
+        stats.errors++;
+    }
+    pthread_mutex_unlock(&stats.lock);
+}
+
+void *worker_multi(void *arg) {
     thread_arg_t *targ = (thread_arg_t *)arg;
     config_t *cfg = targ->config;
 
-    while (time(NULL) - targ->start_time < cfg->duration) {
-        CURL *curl = curl_easy_init();
-        if (!curl) continue;
-
-        CURLM *multi = curl_multi_init();
-        if (!multi) {
-            curl_easy_cleanup(curl);
-            continue;
-        }
-
-        curl_easy_setopt(curl, CURLOPT_URL, cfg->url);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, cfg->timeout);
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
-        // Nuevo: ignorar verificación de certificado si se pide
-        if (cfg->insecure) {
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-        }
-
-        // Opcional: header personalizado
-        struct curl_slist *headers = NULL;
-        headers = curl_slist_append(headers, "User-Agent: wrt/1.1");
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-        curl_multi_add_handle(multi, curl);
-
-        double start = now_ms();
-        int still_running = 0;
-        curl_multi_perform(multi, &still_running);
-
-        while (still_running) {
-            curl_multi_wait(multi, NULL, 0, 1000, NULL);
-            curl_multi_perform(multi, &still_running);
-        }
-
-        long code = 0;
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
-        double latency = (now_ms() - start) / 1000.0;
-
-        pthread_mutex_lock(&stats.lock);
-        if (code >= 200 && code < 400) {
+    if (cfg->ignore_url) {
+        // Simulación sencilla con sleeps
+        while (time(NULL) - targ->start_time < cfg->duration) {
+            usleep((cfg->timeout_total > 0 ? cfg->timeout_total : 5) * 100000);
+            pthread_mutex_lock(&stats.lock);
             stats.requests++;
-            stats.total_latency += latency;
-            if (latency < stats.min_latency) stats.min_latency = latency;
-            if (latency > stats.max_latency) stats.max_latency = latency;
-        } else if (code == 0) {
-            stats.timeouts++;
-        } else {
-            stats.errors++;
+            pthread_mutex_unlock(&stats.lock);
         }
-        pthread_mutex_unlock(&stats.lock);
-
-        curl_multi_remove_handle(multi, curl);
-        curl_easy_cleanup(curl);
-        curl_multi_cleanup(multi);
-        curl_slist_free_all(headers);
+        return NULL;
     }
+
+    CURLM *multi_handle = curl_multi_init();
+    if (!multi_handle) return NULL;
+
+    int max_handles = cfg->connections > 0 ? cfg->connections : 10;
+    easy_request_t *requests = calloc(max_handles, sizeof(easy_request_t));
+
+    // Inicializar easy handles
+    for (int i = 0; i < max_handles; i++) {
+        CURL *easy = curl_easy_init();
+        requests[i].easy_handle = easy;
+        requests[i].config = cfg;
+        requests[i].active = 0;
+        // Configurar opciones comunes que no cambian aquí
+        curl_easy_setopt(easy, CURLOPT_URL, cfg->url);
+        curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_callback);
+        curl_easy_setopt(easy, CURLOPT_TIMEOUT, cfg->timeout_total);
+        curl_easy_setopt(easy, CURLOPT_CONNECTTIMEOUT, cfg->timeout_connect);
+        curl_easy_setopt(easy, CURLOPT_FOLLOWLOCATION, 1L);
+
+        if (cfg->insecure) {
+            curl_easy_setopt(easy, CURLOPT_SSL_VERIFYPEER, 0L);
+            curl_easy_setopt(easy, CURLOPT_SSL_VERIFYHOST, 0L);
+        }
+
+        struct curl_slist *headers = NULL;
+        headers = curl_slist_append(headers, "User-Agent: wrt/1.2");
+        curl_easy_setopt(easy, CURLOPT_HTTPHEADER, headers);
+    }
+
+    // Añadir inicialmente algunos handles
+    int added = 0;
+    for (; added < max_handles && time(NULL) - targ->start_time < cfg->duration; added++) {
+        curl_multi_add_handle(multi_handle, requests[added].easy_handle);
+        requests[added].start_time_ms = now_ms();
+        requests[added].active = 1;
+    }
+
+    int still_running = 0;
+    do {
+        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+
+        if (mc != CURLM_OK) break;
+
+        int msgs_in_queue = 0;
+        CURLMsg *msg;
+        while ((msg = curl_multi_info_read(multi_handle, &msgs_in_queue))) {
+            if (msg->msg == CURLMSG_DONE) {
+                CURL *e = msg->easy_handle;
+                double latency = (now_ms() - requests[0].start_time_ms) / 1000.0;
+
+                // Actualizar stats
+                check_and_update_stats(e, msg->data.result, latency);
+
+                // Remover y resetear handle
+                curl_multi_remove_handle(multi_handle, e);
+                curl_easy_reset(e);
+
+                // Reconfigurar para reutilizar
+                curl_easy_setopt(e, CURLOPT_URL, cfg->url);
+                curl_easy_setopt(e, CURLOPT_WRITEFUNCTION, write_callback);
+                curl_easy_setopt(e, CURLOPT_TIMEOUT, cfg->timeout_total);
+                curl_easy_setopt(e, CURLOPT_CONNECTTIMEOUT, cfg->timeout_connect);
+                curl_easy_setopt(e, CURLOPT_FOLLOWLOCATION, 1L);
+                if (cfg->insecure) {
+                    curl_easy_setopt(e, CURLOPT_SSL_VERIFYPEER, 0L);
+                    curl_easy_setopt(e, CURLOPT_SSL_VERIFYHOST, 0L);
+                }
+                struct curl_slist *headers = NULL;
+                headers = curl_slist_append(headers, "User-Agent: wrt/1.2");
+                curl_easy_setopt(e, CURLOPT_HTTPHEADER, headers);
+
+                // Si todavía queda tiempo, agregar de nuevo para seguir testeando
+                if (time(NULL) - targ->start_time < cfg->duration) {
+                    curl_multi_add_handle(multi_handle, e);
+                    // Actualizar tiempo inicio para esta request
+                    for (int i = 0; i < max_handles; i++) {
+                        if (requests[i].easy_handle == e) {
+                            requests[i].start_time_ms = now_ms();
+                            requests[i].active = 1;
+                            break;
+                        }
+                    }
+                } else {
+                    // Ya no agregar más
+                    for (int i = 0; i < max_handles; i++) {
+                        if (requests[i].easy_handle == e) {
+                            requests[i].active = 0;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Esperar un poco para no saturar CPU
+        curl_multi_wait(multi_handle, NULL, 0, 1000, NULL);
+
+    } while (still_running > 0);
+
+    for (int i = 0; i < max_handles; i++) {
+        if (requests[i].easy_handle) {
+            curl_easy_cleanup(requests[i].easy_handle);
+        }
+    }
+    free(requests);
+    curl_multi_cleanup(multi_handle);
 
     return NULL;
 }
 
 void print_usage(char *prog) {
-    printf("Uso: %s URL -r threads -p conexiones -t duracion -w timeout [--insecure]\n", prog);
+    printf("Uso: %s URL -r threads -p conexiones -t duracion -w timeout_total -c timeout_connect [--insecure] [-x]\n", prog);
+    printf("  --insecure  Ignorar verificación SSL\n");
+    printf("  -x          Ignorar URL (simular carga sin hacer peticiones)\n");
+    printf("\nEjemplo:\n");
+    printf("  %s https://ejemplo.com -r 10 -p 100 -t 30 -w 10 -c 5 --insecure\n", prog);
+    printf("  %s rtmp://ejemplo.com/stream -r 5 -p 50 -t 60 -w 20 -c 10\n", prog);
+    printf("  %s http://localhost -r 4 -p 10 -t 15 -w 5 -c 2 -x\n", prog);
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 9) {
+    if (argc < 11) {
         print_usage(argv[0]);
         return 1;
     }
 
     config_t cfg = {0};
     strncpy(cfg.url, argv[1], MAX_URL_LEN - 1);
+    cfg.timeout_total = 10;
+    cfg.timeout_connect = 5;
 
     for (int i = 2; i < argc; i++) {
         if (!strcmp(argv[i], "-r") && i + 1 < argc) {
@@ -158,9 +253,13 @@ int main(int argc, char *argv[]) {
         } else if (!strcmp(argv[i], "-t") && i + 1 < argc) {
             cfg.duration = atoi(argv[++i]);
         } else if (!strcmp(argv[i], "-w") && i + 1 < argc) {
-            cfg.timeout = atoi(argv[++i]);
+            cfg.timeout_total = atoi(argv[++i]);
+        } else if (!strcmp(argv[i], "-c") && i + 1 < argc) {
+            cfg.timeout_connect = atoi(argv[++i]);
         } else if (!strcmp(argv[i], "--insecure")) {
             cfg.insecure = 1;
+        } else if (!strcmp(argv[i], "-x")) {
+            cfg.ignore_url = 1;
         } else {
             print_usage(argv[0]);
             return 1;
@@ -168,10 +267,13 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Lanzando prueba: %s\n", cfg.url);
-    printf("Threads: %d, Conexiones: %d, Duración: %ds, Timeout: %ds\n",
-           cfg.threads, cfg.connections, cfg.duration, cfg.timeout);
+    printf("Threads: %d, Conexiones: %d, Duración: %ds, Timeout total: %ds, Timeout conexión: %ds\n",
+           cfg.threads, cfg.connections, cfg.duration, cfg.timeout_total, cfg.timeout_connect);
     if (cfg.insecure) {
-        printf("⚠️  Ignorando verificación SSL (modo --insecure)\n");
+        printf("⚠️ Ignorando verificación SSL (modo --insecure)\n");
+    }
+    if (cfg.ignore_url) {
+        printf("⚠️ Modo ignorar URL activado (simulación sin peticiones)\n");
     }
     printf("\n");
 
@@ -185,7 +287,7 @@ int main(int argc, char *argv[]) {
     pthread_create(&progress_tid, NULL, progress_bar_thread, &cfg);
 
     for (int i = 0; i < cfg.threads; i++) {
-        pthread_create(&tids[i], NULL, worker, &targ);
+        pthread_create(&tids[i], NULL, worker_multi, &targ);
     }
 
     for (int i = 0; i < cfg.threads; i++) {
