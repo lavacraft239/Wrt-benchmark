@@ -1,10 +1,14 @@
-all: wrt wrtHome
+CC = cc
+CFLAGS = -Wall -O2
+LDFLAGS = -lcurl -lpthread
 
-wrt: wrt.c
-	$(CC) -o wrt wrt.c $(CFLAGS)
+all: wrt
 
-wrtHome: wrtHome.c
-	$(CC) -o wrtHome wrtHome.c $(CFLAGS)
+wrt: wrt.o
+	$(CC) -o wrt wrt.o $(LDFLAGS)
+
+wrt.o: wrt.c
+	$(CC) $(CFLAGS) -c wrt.c
 
 clean:
-	rm -f wrt wrtHome
+	rm -f wrt wrt.o
