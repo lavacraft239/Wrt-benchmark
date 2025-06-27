@@ -1,18 +1,10 @@
-# Makefile para compilar wrt.c y wrtHome.c
+all: wrt wrtHome
 
-CC = gcc
-CFLAGS = -Wall -O2 -lcurl -lpthread
+wrt: wrt.c
+	$(CC) -o wrt wrt.c $(CFLAGS)
 
-all: wrt
-
-wrt: wrt.o wrtHome.o
-	$(CC) -o wrt wrt.o wrtHome.o $(CFLAGS)
-
-wrt.o: wrt.c
-	$(CC) -c wrt.c -o wrt.o
-
-wrtHome.o: wrtHome.c
-	$(CC) -c wrtHome.c -o wrtHome.o
+wrtHome: wrtHome.c
+	$(CC) -o wrtHome wrtHome.c $(CFLAGS)
 
 clean:
-	rm -f wrt wrt.o wrtHome.o
+	rm -f wrt wrtHome
