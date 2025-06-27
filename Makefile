@@ -1,13 +1,22 @@
 CC = gcc
-CFLAGS = -Wall -O2
-LIBS = -lcurl -lpthread
+CFLAGS = -lcurl -lpthread -Wall -O2
+
+# Archivos fuente
+SRC = wrt.c wrtHome.c
+
+# Archivo objeto (compilado)
+OBJ = $(SRC:.c=.o)
+
+# Nombre del ejecutable
 TARGET = wrt
-SRC = wrt.c
 
 all: $(TARGET)
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+$(TARGET): $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)
+
+%.o: %.c
+	$(CC) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) *.o wrt_results.csv
+	rm -f $(OBJ) $(TARGET)
