@@ -9,6 +9,3 @@ wrt.o: wrt.c
 
 wrtHome.o: wrtHome.c
     gcc -c wrtHome.c -o wrtHome.o
-
-clean:
-    rm -f wrt wrtHome *.o
