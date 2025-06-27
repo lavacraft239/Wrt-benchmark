@@ -56,4 +56,11 @@ Wrt es el mejor programa de ataque para teléfonos.
 
 ---
 
+## Licencia
+
+WRT es un proyecto de código abierto bajo la licencia MIT.  
+Ver el archivo [LICENSE](LICENSE) para más detalles.
+
+---
+
 Muchas gracias por leer y cierto soy Santiago Adios🤗.
