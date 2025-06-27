@@ -1,22 +1,14 @@
-CC = gcc
-CFLAGS = -lcurl -lpthread -Wall -O2
+wrt: wrt.o
+    gcc -o wrt wrt.o -lcurl -lpthread -Wall -O2
 
-# Archivos fuente
-SRC = wrt.c wrtHome.c
+wrtHome: wrtHome.o
+    gcc -o wrtHome wrtHome.o -lcurl -lpthread -Wall -O2
 
-# Archivo objeto (compilado)
-OBJ = $(SRC:.c=.o)
+wrt.o: wrt.c
+    gcc -c wrt.c -o wrt.o
 
-# Nombre del ejecutable
-TARGET = wrt
-
-all: $(TARGET)
-
-$(TARGET): $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS)
-
-%.o: %.c
-	$(CC) -c $< -o $@
+wrtHome.o: wrtHome.c
+    gcc -c wrtHome.c -o wrtHome.o
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+    rm -f wrt wrtHome *.o
