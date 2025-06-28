@@ -1,0 +1,11 @@
+Package: wrt
+Version: 1.0
+Architecture: aarch64
+Maintainer: tro
+Filename: pool/wrt-deb.deb
+Size: 4636
+MD5sum: a050a1fc6ddf4c5f5b382d34065ffebd
+SHA1: 0cace49c86199fd81f28ed703eff1f541a8d09dc
+SHA256: a7a569ea8990976142f2dfc30169c27a24a7b78c4c0c6805915a7cb98a77a804
+Description: Herramienta de carga HTTP tipo wrk para Termux
+
