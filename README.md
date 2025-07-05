@@ -67,7 +67,7 @@ Y recuerda que es un herramienta de benchmarg
 
 ---
 
-El ![Logo de WRT](Wrt.png)
+El Logo de WRT![Logo de WRT](Wrt.png)
 
 ---
 
