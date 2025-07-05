@@ -31,6 +31,9 @@ sudo apt update && sudo apt install curl git build-essential -y
 
 se compila con *make*
 
+ ejemplo:
+ ![Ejemplo](Screenshot_20250705_163946_Termux.jpg)
+ 
 ---
 
 # Como utilizar wrt
