@@ -1,3 +1,5 @@
+<img src="Wrt.png" align="left" width="120" style="margin-right: 10px;">
+
 # WRT (Web Request Tool)
 
 WRT es una herramienta de prueba de carga HTTP(S) escrita en C diseñada para funcionar en Termux y sistemas Linux.  
