@@ -67,4 +67,8 @@ Y recuerda que es un herramienta de benchmarg
 
 ---
 
+El ![Logo de WRT](logo.png)
+
+---
+
 Muchas gracias por leer y cierto soy Santiago Adios🤗.
