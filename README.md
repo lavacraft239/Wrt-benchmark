@@ -18,12 +18,12 @@ Está orientada a realizar pruebas de rendimiento y estrés de servidores web, i
 
 se instala con (para termux):
 
-pkg install curl
-pkg install libcurl
+```pkg install curl```
+```pkg install libcurl```
 
 y en Linux
 
-sudo apt update && sudo apt install curl git build-essential -y
+```sudo apt update && sudo apt install curl git build-essential -y```
 
 ---
 
