@@ -9,8 +9,8 @@ Está orientada a realizar pruebas de rendimiento y estrés de servidores web, i
 
 ### Clonar repositorio desde GitHub
 
-```git clone https://github.com/lavacraft239/Wrt.git
-cd Wrt```
+```git clone https://github.com/lavacraft239/Wrt.git```
+```cd Wrt```
 
 ---
 
@@ -29,7 +29,7 @@ sudo apt update && sudo apt install curl git build-essential -y
 
 # Como compilar
 
-se compila con *make*
+se compila con ```*make*```
 
  ejemplo:
  ![Ejemplo](Screenshot_20250705_163946_Termux.jpg)
@@ -41,15 +41,15 @@ se compila con *make*
 se utilisa con el comando con
 
 Con el https
-./wrt https://ejemplo.com -r 10 -p 100 -t 30 -w 10 -c 5 --insecure
+```./wrt https://ejemplo.com -r 10 -p 100 -t 30 -w 10 -c 5 --insecure```
 
 Con el http
 
-./wrt http://ejemplo.com -r 10 -p 100 -t 30 -w 10 -c 5
+```./wrt http://ejemplo.com -r 10 -p 100 -t 30 -w 10 -c 5```
 
 Con el rtmp
 
-./wrt rtmp://localhost/live/ejemplo -r 10 -p 100 -t 30 -w 10 -c 5
+```./wrt rtmp://localhost/live/ejemplo -r 10 -p 100 -t 30 -w 10 -c 5```
 
 ---
 
