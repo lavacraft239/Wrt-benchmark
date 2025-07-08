@@ -74,4 +74,8 @@ El Logo de WRT![Logo de WRT](Wrt.png)
 
 ---
 
+Para utilizar sin ./ puede hacer ```source ~/.bashrc```
+
+---
+
 Muchas gracias por leer y cierto soy Santiago Adios🤗.
