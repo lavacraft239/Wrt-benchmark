@@ -14,6 +14,15 @@ Está orientada a realizar pruebas de rendimiento y estrés de servidores web, i
 
 ---
 
+# Instalación con dpkg
+
+En termux:
+dpkg -i wrt-deb.deb
+
+En linux:
+sudo dpkg -i wrt-deb.deb
+
+---
 # Como instalar los paquetes
 
 se instala con (para termux):
