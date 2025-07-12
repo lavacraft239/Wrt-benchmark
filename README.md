@@ -74,4 +74,8 @@ El Logo de WRT![Logo de WRT](Wrt.png)
 
 ---
 
+Para utilizar sin ./ puede hacer ```source ~/.bashrc``` y después puedes utilizar sin ./ por ejemplo wrt https://ejemplo.com -r 10 -p 100 -t 30 -w 10 -c 5 --insecure
+
+---
+
 Muchas gracias por leer y cierto soy Santiago Adios🤗.
