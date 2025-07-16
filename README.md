@@ -1,3 +1,16 @@
+<a href="https://github.com/tuusuario/wrt" target="_blank" style="
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    ">
+  Colaborar en WRT
+</a>
+
 # WRT (Web Request Tool)
 
 WRT es una herramienta de prueba de carga HTTP(S) escrita en C diseñada para funcionar en Termux y sistemas Linux.  
