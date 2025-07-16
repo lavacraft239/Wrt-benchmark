@@ -7,6 +7,10 @@ Está orientada a realizar pruebas de rendimiento y estrés de servidores web, i
 
 ## Instalación
 
+en un futuro podes instalar pkg install wrt
+
+y podes instalar por node.js nmp -y wrt-js
+
 ### Clonar repositorio desde GitHub
 
 ```git clone https://github.com/lavacraft239/Wrt.git```
