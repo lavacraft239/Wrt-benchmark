@@ -13,7 +13,7 @@
 ## Contributors ✨
 
 - [@lavacraft239](https://github.com/lavacraft239) - Creador principal
-- [@Iru120](https://github.com/Iru120) - Colaboradora / Ideas y soporte
+- [@Iru2000](https://github.com/Iru2000) - Colaboradora / Ideas y soporte / Mi hermana
 
 # WRT (Web Request Tool)
 
