@@ -10,6 +10,10 @@
     ">
   Colaborar en WRT
 </a>
+## Contributors ✨
+
+- [@lavacraft239](https://github.com/lavacraft239) - Creador principal
+- [@Iru120](https://github.com/Iru120) - Colaboradora / Ideas y soporte
 
 # WRT (Web Request Tool)
 
