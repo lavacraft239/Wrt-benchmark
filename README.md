@@ -24,9 +24,9 @@ Está orientada a realizar pruebas de rendimiento y estrés de servidores web, i
 
 ## Instalación
 
-en un futuro podes instalar pkg install wrt
+en un futuro puedes instalar pkg install wrt
 
-y podes instalar por node.js nmp -y wrt-js
+y puedes instalar por node.js nmp -y wrt-js
 
 ### Clonar repositorio desde GitHub
 
@@ -68,7 +68,7 @@ se compila con ```*make*```
 
 # Como utilizar wrt
 
-se utilisa con el comando con
+se utiliza con el comando con
 
 Con el https
 ```./wrt https://ejemplo.com -r 10 -p 100 -t 30 -w 10 -c 5 --insecure```
@@ -96,7 +96,7 @@ Ver el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
-Y recuerda que es un herramienta de benchmarg
+Y recuerda que es un herramienta de benchmark
 
 ---
 
