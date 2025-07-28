@@ -1,4 +1,4 @@
-[![Join the WRT Discord](https://img.shields.io/discord/1156378657244022804?label=Discord&logo=discord&color=5865F2)](https://discord.gg/w5GeRAwV)
+[![Join the WRT Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/w5GeRAwV)
 
 ![visitas](https://visitor-badge.laobi.icu/badge?page_id=lavacraft239.Wrt-benchmark)
 ![Stars](https://img.shields.io/github/stars/lavacraft239/Wrt-benchmark?style=social)
