@@ -1,4 +1,4 @@
-<a href="https://github.com/lavacraft239/wrt/fork" target="_blank" style="
+<a href="https://github.com/lavacraft239/Wrt-benchmark/fork" target="_blank" style="
     display: inline-block;
     padding: 10px 20px;
     background-color: #28a745;
