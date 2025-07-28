@@ -1,3 +1,6 @@
+![visitas](https://visitor-badge.laobi.icu/badge?page_id=lavacraft239.Wrt-benchmark)
+![Stars](https://img.shields.io/github/stars/lavacraft239/Wrt-benchmark?style=social)
+
 <a href="https://github.com/lavacraft239/Wrt-benchmark/fork" target="_blank" style="
     display: inline-block;
     padding: 10px 20px;
@@ -19,9 +22,6 @@
 
 WRT es una herramienta de prueba de carga HTTP(S) escrita en C diseñada para funcionar en Termux y sistemas Linux.  
 Está orientada a realizar pruebas de rendimiento y estrés de servidores web, incluyendo soporte para conexiones HTTP, HTTPS y RTMP.
-
-![visitas](https://visitor-badge.laobi.icu/badge?page_id=lavacraft239.Wrt-benchmark)
-![Stars](https://img.shields.io/github/stars/lavacraft239/Wrt-benchmark?style=social)
 
 ---
 
