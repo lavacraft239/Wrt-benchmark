@@ -225,8 +225,9 @@ void print_usage(char *prog) {
     printf("  --small     Modo rápido con parámetros por defecto (r=2, p=10, t=10, w=5, c=2)\n");
     printf("\nEjemplo:\n");
     printf("  %s https://ejemplo.com -r 10 -p 100 -t 30 -w 10 -c 5 --insecure\n", prog);
-    printf("  %s rtmp://ejemplo.com/stream -r 5 -p 50 -t 60 -w 20 -c 10\n", prog);
+    printf("  %s rtmp://ejemplo.com/stream -r 5 -p 50 -t 60 -w 20 -c 10\n", prog);    
     printf("  %s http://localhost --small\n", prog);
+    printf("  %s http://localhost  -r 10 -p 100 -t 30 -w 10 -c 5", prog);
 }
 
 // Función para test RTMP usando ffmpeg
