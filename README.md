@@ -15,6 +15,8 @@
 - [@lavacraft239](https://github.com/lavacraft239) - Creador principal
 - [@Iru2000](https://github.com/Iru2000) - Colaboradora / Ideas y soporte / Mi hermana
 
+https://discord.gg/AYv29PXt
+
 # WRT (Web Request Tool)
 
 WRT es una herramienta de prueba de carga HTTP(S) escrita en C diseñada para funcionar en Termux y sistemas Linux.  
